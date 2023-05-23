@@ -24,7 +24,7 @@ final class AzureBlobStorageAdapter extends BaseAzureBlobStorageAdapter
      *
      * @param \MicrosoftAzure\Storage\Blob\BlobRestProxy $client Client.
      * @param string $container Container.
-     * @param string $key
+     * @param string|null $key
      * @param string|null $url URL.
      * @param string $prefix Prefix.
      * @param string $visibilityHandling Handling of visibility support.
@@ -34,8 +34,8 @@ final class AzureBlobStorageAdapter extends BaseAzureBlobStorageAdapter
     public function __construct(
         private BlobRestProxy $client,
         private string $container,
-        private string $key = null,
-        private string $url = null,
+        private string|null $key = null,
+        private string|null $url = null,
         private string $prefix = '',
         private string $visibilityHandling = self::ON_VISIBILITY_IGNORE
     ) {
