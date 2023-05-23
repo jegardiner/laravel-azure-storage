@@ -7,6 +7,7 @@ namespace Matthewbdaly\LaravelAzureStorage;
 use Illuminate\Support\Arr;
 use League\Flysystem\AzureBlobStorage\AzureBlobStorageAdapter as BaseAzureBlobStorageAdapter;
 use League\Flysystem\FileAttributes;
+use League\Flysystem\Visibility;
 use Matthewbdaly\LaravelAzureStorage\Exceptions\InvalidCustomUrl;
 use Matthewbdaly\LaravelAzureStorage\Exceptions\KeyNotSet;
 use MicrosoftAzure\Storage\Blob\BlobRestProxy;
@@ -109,5 +110,9 @@ final class AzureBlobStorageAdapter extends BaseAzureBlobStorageAdapter
         if ($this->visibilityHandling === self::ON_VISIBILITY_THROW_ERROR) {
             throw UnableToRetrieveMetadata::visibility($path, 'Azure does not support visibility');
         }
+
+        $metadata = $this->fetchMetadata($this->prefixer->prefixPath($path));
+        $metadata->visibility = Visibility::PUBLIC;
+        return $metadata;
     }
 }
