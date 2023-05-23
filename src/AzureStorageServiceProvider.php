@@ -53,7 +53,7 @@ final class AzureStorageServiceProvider extends ServiceProvider
                 isset($config['key']) ? (string)$config['key'] : null,
                 isset($config['url']) ? (string)$config['url'] : null,
                 isset($config['prefix']) ? (string)$config['prefix'] : '',
-                isset($config['visibility']) ? (string)$config['visibility'] : self::ON_VISIBILITY_IGNORE,
+                isset($config['visibility']) ? (string)$config['visibility'] : 'ignore',
             );
 
             return new FilesystemAdapter(
