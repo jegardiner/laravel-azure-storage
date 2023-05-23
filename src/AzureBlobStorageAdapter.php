@@ -18,40 +18,6 @@ use MicrosoftAzure\Storage\Blob\BlobSharedAccessSignatureHelper;
  */
 final class AzureBlobStorageAdapter extends BaseAzureBlobStorageAdapter
 {
-    /**
-     * The Azure Blob Client
-     *
-     * @var BlobRestProxy
-     */
-    private $client;
-
-    /**
-     * The container name
-     *
-     * @var string
-     */
-    private $container;
-
-    /**
-     * Custom url for getUrl()
-     *
-     * @var string|null
-     */
-    private $url;
-
-    /**
-     * The account key to access the storage
-     *
-     * @var string|null
-     */
-    private $key;
-
-    /**
-     * The prefix for the adapter
-     *
-     * @var string
-     */
-    private string $prefix;
 
     /**
      * Create a new AzureBlobStorageAdapter instance.
@@ -61,25 +27,22 @@ final class AzureBlobStorageAdapter extends BaseAzureBlobStorageAdapter
      * @param string $key
      * @param string|null $url URL.
      * @param string $prefix Prefix.
+     * @param string $visibilityHandling Handling of visibility support.
      *
      * @throws InvalidCustomUrl URL is not valid.
      */
     public function __construct(
-        BlobRestProxy $client,
-        string $container,
-        string $key = null,
-        string $url = null,
-        string $prefix = ''
+        private BlobRestProxy $client,
+        private string $container,
+        private string $key = null,
+        private string $url = null,
+        private string $prefix = '',
+        private string $visibilityHandling = self::ON_VISIBILITY_IGNORE
     ) {
         parent::__construct($client, $container, $prefix);
-        $this->client = $client;
-        $this->container = $container;
         if ($url && !filter_var($url, FILTER_VALIDATE_URL)) {
             throw new InvalidCustomUrl();
         }
-        $this->url = $url;
-        $this->key = $key;
-        $this->prefix = $prefix;
     }
 
     /**

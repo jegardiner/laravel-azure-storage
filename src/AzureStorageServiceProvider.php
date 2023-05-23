@@ -31,6 +31,7 @@ use MicrosoftAzure\Storage\Common\Middlewares\RetryMiddlewareFactory;
  *  key: string|null,
  *  url: string|null,
  *  prefix: string|null,
+ *  visibility: string|null,
  *  retry: ProviderRetryConfig
  * }
  */
@@ -52,6 +53,7 @@ final class AzureStorageServiceProvider extends ServiceProvider
                 isset($config['key']) ? (string)$config['key'] : null,
                 isset($config['url']) ? (string)$config['url'] : null,
                 isset($config['prefix']) ? (string)$config['prefix'] : '',
+                isset($config['visibility']) ? (string)$config['visibility'] : null,
             );
 
             return new FilesystemAdapter(
