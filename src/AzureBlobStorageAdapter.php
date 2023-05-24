@@ -58,10 +58,10 @@ final class AzureBlobStorageAdapter extends BaseAzureBlobStorageAdapter
      */
     public function getUrl(string $path)
     {
-        // The following lines appear to be unnecessary
-        // if ($this->url) {
-        //     return rtrim($this->url, '/') . '/' . ($this->container === '$root' ? '' : $this->container . '/') . ($this->prefix ? $this->prefix . '/' : '') . ltrim($path, '/');
-        // }
+        // The inclusion of prefix appears to be unnecessary, as it already part of $path
+        if ($this->url) {
+            return rtrim($this->url, '/') . '/' . ($this->container === '$root' ? '' : $this->container . '/') . ($this->prefix ? $this->prefix . '/' : '') . ltrim($path, '/');
+        }
         return $this->client->getBlobUrl($this->container, $path);
     }
 
