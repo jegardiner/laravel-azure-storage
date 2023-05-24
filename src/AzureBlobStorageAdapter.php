@@ -12,6 +12,7 @@ use Matthewbdaly\LaravelAzureStorage\Exceptions\InvalidCustomUrl;
 use Matthewbdaly\LaravelAzureStorage\Exceptions\KeyNotSet;
 use MicrosoftAzure\Storage\Blob\BlobRestProxy;
 use MicrosoftAzure\Storage\Blob\BlobSharedAccessSignatureHelper;
+use MicrosoftAzure\Storage\Blob\Models\BlobProperties;
 
 /**
  * Blob storage adapter
@@ -114,5 +115,40 @@ final class AzureBlobStorageAdapter extends BaseAzureBlobStorageAdapter
         $metadata = $this->fetchMetadata($this->prefixer->prefixPath($path));
         $metadata->visibility = Visibility::PUBLIC;
         return $metadata;
+    }
+
+    /**
+     * Retrieve object metadata
+     *
+     * @param string $path
+     *
+     * @return FileAttributes
+     */
+    private function fetchMetadata(string $path): FileAttributes
+    {
+        return $this->normalizeBlobProperties(
+            $path,
+            $this->client->getBlobProperties($this->container, $path)->getProperties()
+        );
+    }
+
+    /**
+     * Normalise BLOB properties
+     *
+     * @param string $path
+     * @param BlobProperties $properties
+     *
+     * @return FileAttributes
+     */
+    private function normalizeBlobProperties(string $path, BlobProperties $properties): FileAttributes
+    {
+        return new FileAttributes(
+            $path,
+            $properties->getContentLength(),
+            null,
+            $properties->getLastModified()->getTimestamp(),
+            $properties->getContentType(),
+            ['md5_checksum' => $properties->getContentMD5()]
+        );
     }
 }
