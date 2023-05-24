@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Tests\Unit;
 
 use Illuminate\Filesystem\FilesystemManager;
+use League\Flysystem\FileAttributes;
+use League\Flysystem\UnableToRetrieveMetadata;
 use Matthewbdaly\LaravelAzureStorage\AzureBlobStorageAdapter;
 use Matthewbdaly\LaravelAzureStorage\Exceptions\KeyNotSet;
 use MicrosoftAzure\Storage\Blob\BlobRestProxy;
@@ -79,3 +81,15 @@ it('includes the prefix in the return URL', function (): void {
     $adapter = new AzureBlobStorageAdapter($client, 'container', 'azure_key', 'https://example.com', 'my_prefix');
     $this->assertEquals('https://example.com/container/my_prefix/test.txt', $adapter->getUrl('test.txt'));
 });
+
+// it('returns metadata when visibilityHandling is set to "ignore" (default)', function (): void {
+//     $client = BlobRestProxy::createBlobService('DefaultEndpointsProtocol=https;AccountName=azure_account;AccountKey=' . base64_encode('azure_key'));
+//     $adapter = new AzureBlobStorageAdapter($client, 'azure_container', null, null, 'test_prefix');
+//     $this->assertInstanceOf(FileAttributes::class, $adapter->visibility('test_path'));
+// });
+
+it('throws an error when visibilityHandling is set to "throw"', function (): void {
+    $client = BlobRestProxy::createBlobService('DefaultEndpointsProtocol=https;AccountName=azure_account;AccountKey=' . base64_encode('azure_key'));
+    $adapter = new AzureBlobStorageAdapter($client, 'azure_container', null, null, 'test_prefix', AzureBlobStorageAdapter::ON_VISIBILITY_THROW_ERROR);
+    $visbility = $adapter->visibility('test_path');
+})->throws(UnableToRetrieveMetadata::class);

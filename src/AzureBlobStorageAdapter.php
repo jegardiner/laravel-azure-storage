@@ -4,15 +4,19 @@ declare(strict_types=1);
 
 namespace Matthewbdaly\LaravelAzureStorage;
 
+use ReflectionMethod;
+use ReflectionProperty;
 use Illuminate\Support\Arr;
-use League\Flysystem\AzureBlobStorage\AzureBlobStorageAdapter as BaseAzureBlobStorageAdapter;
-use League\Flysystem\FileAttributes;
 use League\Flysystem\Visibility;
-use Matthewbdaly\LaravelAzureStorage\Exceptions\InvalidCustomUrl;
-use Matthewbdaly\LaravelAzureStorage\Exceptions\KeyNotSet;
+use League\Flysystem\PathPrefixer;
+use League\Flysystem\FileAttributes;
+use League\Flysystem\UnableToRetrieveMetadata;
 use MicrosoftAzure\Storage\Blob\BlobRestProxy;
-use MicrosoftAzure\Storage\Blob\BlobSharedAccessSignatureHelper;
 use MicrosoftAzure\Storage\Blob\Models\BlobProperties;
+use Matthewbdaly\LaravelAzureStorage\Exceptions\KeyNotSet;
+use MicrosoftAzure\Storage\Blob\BlobSharedAccessSignatureHelper;
+use Matthewbdaly\LaravelAzureStorage\Exceptions\InvalidCustomUrl;
+use League\Flysystem\AzureBlobStorage\AzureBlobStorageAdapter as BaseAzureBlobStorageAdapter;
 
 /**
  * Blob storage adapter
@@ -21,7 +25,6 @@ use MicrosoftAzure\Storage\Blob\Models\BlobProperties;
  */
 final class AzureBlobStorageAdapter extends BaseAzureBlobStorageAdapter
 {
-
     /**
      * Create a new AzureBlobStorageAdapter instance.
      *
@@ -112,43 +115,55 @@ final class AzureBlobStorageAdapter extends BaseAzureBlobStorageAdapter
             throw UnableToRetrieveMetadata::visibility($path, 'Azure does not support visibility');
         }
 
-        $metadata = $this->fetchMetadata($this->prefixer->prefixPath($path));
+        // use a ReflectionMethod to access the parent's private method
+        $fetchMetadata = new ReflectionMethod(parent::class, 'fetchMetadata');
+        // $fetchMetadata->setAccessible(true);
+
+        // use a ReflectionProperty to access the parent's private property
+        $prefixer = new ReflectionProperty(parent::class, 'prefixer');
+        // $prefixer->setAccessible(true);
+
+        $path = $prefixer->getValue($this)->prefixPath($path);
+
+        // $metadata = $this->fetchMetadata($this->prefixer->prefixPath($path));
+        $metadata = $fetchMetadata->invokeArgs($this, array($path));
+
         $metadata->visibility = Visibility::PUBLIC;
         return $metadata;
     }
 
-    /**
-     * Retrieve object metadata
-     *
-     * @param string $path
-     *
-     * @return FileAttributes
-     */
-    private function fetchMetadata(string $path): FileAttributes
-    {
-        return $this->normalizeBlobProperties(
-            $path,
-            $this->client->getBlobProperties($this->container, $path)->getProperties()
-        );
-    }
+    // /**
+    //  * Retrieve object metadata
+    //  *
+    //  * @param string $path
+    //  *
+    //  * @return FileAttributes
+    //  */
+    // private function fetchMetadata(string $path): FileAttributes
+    // {
+    //     return $this->normalizeBlobProperties(
+    //         $path,
+    //         $this->client->getBlobProperties($this->container, $path)->getProperties()
+    //     );
+    // }
 
-    /**
-     * Normalise BLOB properties
-     *
-     * @param string $path
-     * @param BlobProperties $properties
-     *
-     * @return FileAttributes
-     */
-    private function normalizeBlobProperties(string $path, BlobProperties $properties): FileAttributes
-    {
-        return new FileAttributes(
-            $path,
-            $properties->getContentLength(),
-            null,
-            $properties->getLastModified()->getTimestamp(),
-            $properties->getContentType(),
-            ['md5_checksum' => $properties->getContentMD5()]
-        );
-    }
+    // /**
+    //  * Normalise BLOB properties
+    //  *
+    //  * @param string $path
+    //  * @param BlobProperties $properties
+    //  *
+    //  * @return FileAttributes
+    //  */
+    // private function normalizeBlobProperties(string $path, BlobProperties $properties): FileAttributes
+    // {
+    //     return new FileAttributes(
+    //         $path,
+    //         $properties->getContentLength(),
+    //         null,
+    //         $properties->getLastModified()->getTimestamp(),
+    //         $properties->getContentType(),
+    //         ['md5_checksum' => $properties->getContentMD5()]
+    //     );
+    // }
 }
