@@ -58,9 +58,10 @@ final class AzureBlobStorageAdapter extends BaseAzureBlobStorageAdapter
      */
     public function getUrl(string $path)
     {
-        if ($this->url) {
-            return rtrim($this->url, '/') . '/' . ($this->container === '$root' ? '' : $this->container . '/') . ($this->prefix ? $this->prefix . '/' : '') . ltrim($path, '/');
-        }
+        // The following lines appear to be unnecessary
+        // if ($this->url) {
+        //     return rtrim($this->url, '/') . '/' . ($this->container === '$root' ? '' : $this->container . '/') . ($this->prefix ? $this->prefix . '/' : '') . ltrim($path, '/');
+        // }
         return $this->client->getBlobUrl($this->container, $path);
     }
 
@@ -138,38 +139,4 @@ final class AzureBlobStorageAdapter extends BaseAzureBlobStorageAdapter
         return $metametadata;
     }
 
-    // /**
-    //  * Retrieve object metadata
-    //  *
-    //  * @param string $path
-    //  *
-    //  * @return FileAttributes
-    //  */
-    // private function fetchMetadata(string $path): FileAttributes
-    // {
-    //     return $this->normalizeBlobProperties(
-    //         $path,
-    //         $this->client->getBlobProperties($this->container, $path)->getProperties()
-    //     );
-    // }
-
-    // /**
-    //  * Normalise BLOB properties
-    //  *
-    //  * @param string $path
-    //  * @param BlobProperties $properties
-    //  *
-    //  * @return FileAttributes
-    //  */
-    // private function normalizeBlobProperties(string $path, BlobProperties $properties): FileAttributes
-    // {
-    //     return new FileAttributes(
-    //         $path,
-    //         $properties->getContentLength(),
-    //         null,
-    //         $properties->getLastModified()->getTimestamp(),
-    //         $properties->getContentType(),
-    //         ['md5_checksum' => $properties->getContentMD5()]
-    //     );
-    // }
 }
