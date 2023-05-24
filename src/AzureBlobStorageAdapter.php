@@ -8,11 +8,9 @@ use ReflectionMethod;
 use ReflectionProperty;
 use Illuminate\Support\Arr;
 use League\Flysystem\Visibility;
-use League\Flysystem\PathPrefixer;
 use League\Flysystem\FileAttributes;
 use League\Flysystem\UnableToRetrieveMetadata;
 use MicrosoftAzure\Storage\Blob\BlobRestProxy;
-use MicrosoftAzure\Storage\Blob\Models\BlobProperties;
 use Matthewbdaly\LaravelAzureStorage\Exceptions\KeyNotSet;
 use MicrosoftAzure\Storage\Blob\BlobSharedAccessSignatureHelper;
 use Matthewbdaly\LaravelAzureStorage\Exceptions\InvalidCustomUrl;
@@ -128,8 +126,16 @@ final class AzureBlobStorageAdapter extends BaseAzureBlobStorageAdapter
         // $metadata = $this->fetchMetadata($this->prefixer->prefixPath($path));
         $metadata = $fetchMetadata->invokeArgs($this, array($path));
 
-        $metadata->visibility = Visibility::PUBLIC;
-        return $metadata;
+        $metametadata = new FileAttributes(
+            $metadata->path(),
+            $metadata->fileSize(),
+            Visibility::PUBLIC,
+            $metadata->lastModified(),
+            $metadata->mimeType(),
+            $metadata->extraMetadata()
+        );
+
+        return $metametadata;
     }
 
     // /**
